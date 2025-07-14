@@ -1,0 +1,69 @@
+# VedCoin .gitignore
+
+# Rust build artifacts
+target/
+Cargo.lock
+**/*.rs.bk
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.vim/
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs and databases
+*.log
+*.sqlite
+*.sqlite3
+*.db
+logs/
+
+# Development environment
+.env
+.env.local
+.env.production
+.env.staging
+
+# Node modules (if any JS tooling)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Documentation builds
+book/
+docs/_build/
+target/doc/
+
+# Test results
+coverage/
+.nyc_output/
+*.lcov
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+*.bak
+
+# Package managers
+Cargo.lock
+
+# Rust-specific
+**/*.rs.bk
+*.pdb
+
+# Substrate-specific
+.substrate/
+keystore/
+
+# Development tools
+.history/
+.vscode/settings.json
