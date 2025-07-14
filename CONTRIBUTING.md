@@ -46,11 +46,20 @@ cargo test
 
 ### Development Process
 1. **Fork** the repository
-2. **Create** a feature branch from `main`
-3. **Implement** your changes with tests
-4. **Run** `cargo fmt` and `cargo clippy`
-5. **Ensure** all tests pass with `cargo test`
-6. **Submit** a pull request with clear description
+2. **Create** a feature branch from the appropriate base:
+   - `develop` - for new features
+   - `main` - for hotfixes only
+3. **Use** the correct branch naming:
+   - `feature/core-blockchain` - Core blockchain development
+   - `feature/consensus` - Consensus mechanism work
+   - `feature/smart-contracts` - Smart contract development
+   - `feature/bridge-system` - VedCoin↔VedGov bridge
+   - `feature/bridge-integration` - Bridge integration features
+   - `hotfix/main` - Critical production fixes
+4. **Implement** your changes with tests
+5. **Run** `cargo fmt` and `cargo clippy`
+6. **Ensure** all tests pass with `cargo test`
+7. **Submit** a pull request to `develop` (or `main` for hotfixes)
 
 ### Commit Message Format
 ```
