@@ -1,3 +1,5 @@
+[patch.crates-io]
+windows-sys = "0.48.0"
 [package]
 name = "pallet-vedcoin"
 version = "0.1.0"
@@ -11,13 +13,13 @@ codec = { package = "parity-scale-codec", version = "3.0.0", default-features = 
 scale-info = { version = "2.0.0", default-features = false, features = ["derive"] }
 
 # Substrate dependencies
-frame-benchmarking = { version = "4.0.0-dev", default-features = false, optional = true }
-frame-support = { version = "4.0.0-dev", default-features = false }
-frame-system = { version = "4.0.0-dev", default-features = false }
-sp-api = { version = "4.0.0-dev", default-features = false }
-sp-core = { version = "7.0.0", default-features = false }
-sp-runtime = { version = "7.0.0", default-features = false }
-sp-std = { version = "5.0.0", default-features = false }
+frame-benchmarking = { version = "4.0.0", default-features = false, optional = true }
+frame-support = { version = "4.0.0", default-features = false }
+frame-system = { version = "4.0.0", default-features = false }
+sp-api = { version = "4.0.0", default-features = false }
+sp-core = { version = "4.0.0", default-features = false }
+sp-runtime = { version = "4.0.0", default-features = false }
+sp-std = { version = "4.0.0", default-features = false }
 
 [features]
 default = ["std"]
