@@ -1,3 +1,153 @@
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use frame_support::{assert_ok, assert_noop, parameter_types, traits::{OnFinalize, OnInitialize}};
+    use sp_core::H256;
+    use frame_system as system;
+    use sp_runtime::{testing::Header, traits::{BlakeTwo256, IdentityLookup}, Perbill};
+
+    type UncheckedExtrinsic = frame_system::mocking::MockUncheckedExtrinsic<Test>;
+    type Block = frame_system::mocking::MockBlock<Test>;
+
+    frame_support::construct_runtime!(
+        pub enum Test where
+            Block = Block,
+            NodeBlock = Block,
+            UncheckedExtrinsic = UncheckedExtrinsic,
+        {
+            System: frame_system,
+            VedCoin: crate,
+        }
+    );
+
+    parameter_types! {
+        pub const BlockHashCount: u64 = 250;
+        pub const MaxSymbolLength: u32 = 8;
+        pub const ExistentialDeposit: u128 = 1;
+        pub const PalletId: frame_support::PalletId = frame_support::PalletId(*b"ved/coin");
+        pub const FeeBurnPercentage: Perbill = Perbill::from_percent(10);
+    }
+
+    impl system::Config for Test {
+        type BaseCallFilter = frame_support::traits::Everything;
+        type BlockWeights = ();
+        type BlockLength = ();
+        type DbWeight = ();
+        type Origin = Origin;
+        type Call = Call;
+        type Index = u64;
+        type BlockNumber = u64;
+        type Hash = H256;
+        type Hashing = BlakeTwo256;
+        type AccountId = u64;
+        type Lookup = IdentityLookup<u64>;
+        type Header = Header;
+        type Event = Event;
+        type BlockHashCount = BlockHashCount;
+        type Version = ();
+        type PalletInfo = PalletInfo;
+        type AccountData = pallet_balances::AccountData<u128>;
+        type OnNewAccount = ();
+        type OnKilledAccount = ();
+        type SystemWeightInfo = ();
+        type SS58Prefix = ();
+        type OnSetCode = ();
+        type MaxConsumers = frame_support::traits::ConstU32<16>;
+    }
+
+    impl Config for Test {
+        type RuntimeEvent = Event;
+        type Currency = pallet_balances::Pallet<Test>;
+        type MaxSymbolLength = MaxSymbolLength;
+        type PalletId = PalletId;
+        type FeeBurnPercentage = FeeBurnPercentage;
+    }
+
+    parameter_types! {
+        pub const ExistentialDeposit2: u128 = 1;
+    }
+    impl pallet_balances::Config for Test {
+        type Balance = u128;
+        type DustRemoval = ();
+        type RuntimeEvent = Event;
+        type ExistentialDeposit = ExistentialDeposit2;
+        type AccountStore = System;
+        type WeightInfo = ();
+        type MaxLocks = (); type MaxReserves = (); type ReserveIdentifier = [u8; 8];
+        type FreezeIdentifier = (); type MaxFreezes = (); type MaxHolds = (); type HoldIdentifier = (); 
+    }
+
+    pub fn new_test_ext() -> sp_io::TestExternalities {
+        let mut t = frame_system::GenesisConfig::default().build_storage::<Test>().unwrap();
+        pallet_balances::GenesisConfig::<Test> {
+            balances: vec![(1, 1_000_000), (2, 1_000_000), (3, 1_000_000)],
+        }.assimilate_storage(&mut t).unwrap();
+        t.into()
+    }
+
+    #[test]
+    fn initialize_token_works() {
+        new_test_ext().execute_with(|| {
+            assert_ok!(VedCoin::initialize_token(
+                Origin::root(),
+                b"VED".to_vec(),
+                b"VedCoin".to_vec(),
+                18,
+                1_000_000_000_000_000_000u128
+            ));
+            let info = VedCoin::token_info().unwrap();
+            assert_eq!(info.symbol, b"VED".to_vec());
+            assert_eq!(info.name, b"VedCoin".to_vec());
+            assert_eq!(info.decimals, 18);
+            assert_eq!(info.total_supply, 1_000_000_000_000_000_000u128);
+        });
+    }
+
+    #[test]
+    fn transfer_works() {
+        new_test_ext().execute_with(|| {
+            assert_ok!(VedCoin::initialize_token(Origin::root(), b"VED".to_vec(), b"VedCoin".to_vec(), 18, 1_000_000_000_000_000_000u128));
+            assert_ok!(VedCoin::transfer(Origin::signed(1), 2, 100_000));
+        });
+    }
+
+    #[test]
+    fn mint_tokens_works() {
+        new_test_ext().execute_with(|| {
+            assert_ok!(VedCoin::initialize_token(Origin::root(), b"VED".to_vec(), b"VedCoin".to_vec(), 18, 1_000_000_000_000_000_000u128));
+            assert_ok!(VedCoin::mint_tokens(Origin::root(), 1, 500_000));
+        });
+    }
+
+    #[test]
+    fn burn_tokens_works() {
+        new_test_ext().execute_with(|| {
+            assert_ok!(VedCoin::initialize_token(Origin::root(), b"VED".to_vec(), b"VedCoin".to_vec(), 18, 1_000_000_000_000_000_000u128));
+            assert_ok!(VedCoin::burn_tokens(Origin::signed(1), 100_000));
+        });
+    }
+
+    #[test]
+    fn register_and_stake_works() {
+        new_test_ext().execute_with(|| {
+            assert_ok!(VedCoin::initialize_token(Origin::root(), b"VED".to_vec(), b"VedCoin".to_vec(), 18, 1_000_000_000_000_000_000u128));
+            assert_ok!(VedCoin::register_validator(Origin::signed(1), 10));
+            assert_ok!(VedCoin::stake(Origin::signed(1), 1, 100_000));
+            assert_ok!(VedCoin::stake(Origin::signed(2), 1, 50_000));
+        });
+    }
+
+    #[test]
+    fn unstake_works() {
+        new_test_ext().execute_with(|| {
+            assert_ok!(VedCoin::initialize_token(Origin::root(), b"VED".to_vec(), b"VedCoin".to_vec(), 18, 1_000_000_000_000_000_000u128));
+            assert_ok!(VedCoin::register_validator(Origin::signed(1), 10));
+            assert_ok!(VedCoin::stake(Origin::signed(1), 1, 100_000));
+            assert_ok!(VedCoin::unstake(Origin::signed(1), 1, 50_000));
+        });
+    }
+
+}
 #![cfg_attr(not(feature = "std"), no_std)]
 
 //! # VedCoin Pallet
@@ -139,6 +289,19 @@ pub mod pallet {
             validator: T::AccountId,
             total_rewards: u128,
         },
+
+        /// Tokens transferred [from, to, amount]
+        TokensTransferred {
+            from: T::AccountId,
+            to: T::AccountId,
+            amount: u128,
+        },
+
+        /// Tokens minted [to, amount]
+        TokensMinted {
+            to: T::AccountId,
+            amount: u128,
+        },
     }
 
     #[pallet::error]
@@ -193,6 +356,42 @@ pub mod pallet {
 
             TokenInfoStorage::<T>::put(&token_info);
 
+            Ok(())
+        }
+
+        /// Transfer tokens between accounts
+        #[pallet::weight(10_000)]
+        #[pallet::call_index(99)]
+        pub fn transfer(
+            origin: OriginFor<T>,
+            to: T::AccountId,
+            amount: u128,
+        ) -> DispatchResult {
+            let from = ensure_signed(origin)?;
+            ensure!(amount > 0, Error::<T>::ZeroStake);
+            T::Currency::transfer(&from, &to, amount, frame_support::traits::ExistenceRequirement::AllowDeath)?;
+            Self::deposit_event(Event::TokensTransferred { from: from.clone(), to: to.clone(), amount });
+            Ok(())
+        }
+
+        /// Mint new tokens (root only, for controlled supply increases)
+        #[pallet::weight(10_000)]
+        #[pallet::call_index(98)]
+        pub fn mint_tokens(
+            origin: OriginFor<T>,
+            to: T::AccountId,
+            amount: u128,
+        ) -> DispatchResult {
+            ensure_root(origin)?;
+            ensure!(amount > 0, Error::<T>::ZeroStake);
+            T::Currency::deposit_creating(&to, amount);
+            // Update token info
+            if let Some(mut token_info) = Self::token_info() {
+                token_info.circulating_supply = token_info.circulating_supply.saturating_add(amount);
+                token_info.total_supply = token_info.total_supply.saturating_add(amount);
+                TokenInfoStorage::<T>::put(&token_info);
+            }
+            Self::deposit_event(Event::TokensMinted { to: to.clone(), amount });
             Ok(())
         }
 
