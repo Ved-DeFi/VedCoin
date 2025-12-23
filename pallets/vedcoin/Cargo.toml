@@ -13,7 +13,7 @@ codec = { package = "parity-scale-codec", version = "3.0.0", default-features = 
 scale-info = { version = "2.0.0", default-features = false, features = ["derive"] }
 
 # Substrate dependencies
-frame-benchmarking = { version = "4.0.0", default-features = false, optional = true }
+frame-benchmarking = { version = "45.0.0", default-features = false, optional = true }
 frame-support = { version = "4.0.0", default-features = false }
 frame-system = { version = "4.0.0", default-features = false }
 sp-api = { version = "4.0.0", default-features = false }
